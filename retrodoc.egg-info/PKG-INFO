@@ -1,0 +1,6 @@
+Metadata-Version: 2.1
+Name: retrodoc
+Version: 0.1.0
+Summary: CLI application that generates industry-standard specifications for a file using ChatGPT 3.5
+Author: Andrew Marous
+Author-email: andrewmarous@gmail.com
