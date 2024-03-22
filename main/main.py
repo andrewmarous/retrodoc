@@ -12,6 +12,15 @@ from openai import OpenAI
 
 
 def main():
+    """
+    Main function that parses command line arguments and calls the document function.
+    
+    Parameters:
+    None
+    
+    Returns:
+    None
+    """
     parser = argparse.ArgumentParser(description='retrodoc CLI v1.0')
     parser.add_argument('filename', type=str, help='Name of the file to be documented')
     parser.add_argument('--overwrite', '-o', action='store_true',
@@ -24,12 +33,21 @@ def main():
 
 
 def document(args):
+    """
+    Generates specifications for a given file and writes them to the file.
+    
+    Parameters:
+    args (object): An object containing the arguments for the documentation process.
+    
+    Returns:
+    None
+    """
     try:
         filepath = os.path.join(os.getcwd(), args.filename)
         tokens = tokenize_code(filepath)
         comments = generate_comments(tokens)
         print('Specifications generated. Writing to ' + args.filename + '...')
-        write_comments(comments, filepath)
+        write_comments(comments, filepath, args.overwrite)
         print(args.filename + ' successfully documented.')
 
     except FileNotFoundError:
@@ -37,6 +55,15 @@ def document(args):
 
 
 def tokenize_code(filepath):
+    """
+    Tokenizes the code from a file, separating functions and import statements.
+    
+    Parameters:
+    filepath (str): The path to the file containing the code.
+    
+    Returns:
+    dict: A dictionary containing two keys: 'imports' for the list of import statements and 'funcs' for the list of function definitions.
+    """
     if os.path.getsize(filepath) == 0:
         return []
 
@@ -48,9 +75,29 @@ def tokenize_code(filepath):
 
     class MethodVisitor(ast.NodeVisitor):
         def visit_FunctionDef(self, node: FunctionDef):
+            """
+            Generates comments for the provided tokens using the OpenAI GPT-3.5 Turbo model.
+            
+            Parameters:
+            tokens (dict): A dictionary containing a key 'funcs' with a list of tokens to generate comments for.
+            
+            Returns:
+            list: A list of generated comments for each token in the 'funcs' list.
+            """
             statements.get('funcs').append(ast.unparse(node))
 
         def visit_Import(self, node: Import):
+            """
+            Writes comments from a list to the specified file's functions as docstrings.
+            
+            Parameters:
+            comments (list): A list of comments to add as docstrings.
+            filepath (str): The path to the file containing the source code.
+            overwrite (bool): A flag indicating whether existing docstrings should be overwritten.
+            
+            Returns:
+            None
+            """
             statements.get('imports').append(ast.unparse(node))
 
     MethodVisitor().visit(funcs_ast)
@@ -73,8 +120,7 @@ def generate_comments(tokens: dict):
     return comments
 
 
-def write_comments(comments, filepath):
-
+def write_comments(comments, filepath, overwrite):
     with open(filepath, 'r') as file:
         source_code = file.read()
 
@@ -90,7 +136,7 @@ def write_comments(comments, filepath):
             comment = next(comments_iter)
 
             # create comment node
-            indented_docstring_lines = ['    ' + line if i != 0 else line
+            indented_docstring_lines = [function_node.indentation + line if i != 0 else line
                                         for i, line in enumerate(comment.content.split('\n'))]
 
             indented_docstring = "\n".join(indented_docstring_lines)
@@ -98,8 +144,11 @@ def write_comments(comments, filepath):
 
             if function_node.value and not (function_node.value[0].type == 'string' or
                                             function_node.value[0].type == 'raw_string'):
-                # Insert comment
-                function_node.value.insert(0, RedBaron(indented_docstring)[0])
+                function_node.value.insert(0, RedBaron("placeholder"))
+                function_node.value[0] = indented_docstring
+            elif overwrite:
+                function_node.value[0] = indented_docstring
+
         except StopIteration:
             break
 
@@ -139,6 +188,9 @@ arr (list): The input list to be sorted.
 Returns:
 None
 """
+
+Ignore any specification that already exists in the method. You are only to analyze the code and return a specification
+based on that.
 '''
 
 

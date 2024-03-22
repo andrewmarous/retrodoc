@@ -3,18 +3,18 @@ import numpy as np
 
 def train_perceptron(X_train, y_train, X_test, y_test, eta=0.1, n_epochs=10):
     """
-    Trains a perceptron model using the input training data and returns the model weights and accuracy on the test data.
+    Trains a perceptron model using the input training data and evaluates its performance on the test data.
     
     Parameters:
-    X_train (ndarray): The input training data as a 2D array.
-    y_train (ndarray): The target training labels.
-    X_test (ndarray): The input test data as a 2D array.
-    y_test (ndarray): The target test labels.
-    eta (float): The learning rate for updating the model weights (default is 0.1).
-    n_epochs (int): The number of training epochs (default is 10).
+    X_train (numpy.ndarray): The input features for training.
+    y_train (numpy.ndarray): The target labels for training.
+    X_test (numpy.ndarray): The input features for testing.
+    y_test (numpy.ndarray): The target labels for testing.
+    eta (float): The learning rate (default is 0.1).
+    n_epochs (int): The number of epochs for training (default is 10).
     
     Returns:
-    tuple: A tuple containing the model weights (ndarray) and the accuracy of the model on the test data (float).
+    tuple: A tuple containing the trained weight vector (w) and the accuracy of the perceptron model on the test data.
     """
     w = np.zeros(X_train.shape[1])
     for epoch in range(n_epochs):
@@ -36,14 +36,14 @@ def train_perceptron(X_train, y_train, X_test, y_test, eta=0.1, n_epochs=10):
 
 def predict(xi, w):
     """
-    Predicts the class label for a given input data point using the perceptron model.
+    Calculates the activation function and predicts the class label based on it.
     
     Parameters:
-    xi (array): The input data point.
-    w (array): The weights of the perceptron model.
+    xi (array): The input features for prediction.
+    w (array): The weights associated with each feature.
     
     Returns:
-    int: The predicted class label (-1 or 1).
+    int: The predicted class label (1 or -1) based on the calculated activation function.
     """
     activation = np.dot(xi, w)
     return 1 if activation >= 0 else -1
